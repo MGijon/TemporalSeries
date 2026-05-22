@@ -32,6 +32,42 @@ impl TimeSeries {
         Self::new(self.index.clone(), values)
     }
 
+    /// Computes the percentage change between consecutive observations.
+    ///
+    /// The percentage change is defined as:
+    ///
+    /// `value[t] / value[t-1] - 1`
+    ///
+    /// This operation converts price series into returns,
+    /// which are commonly used in quantitative finance.
+    ///
+    /// The first element is set to `NaN` because there is
+    /// no previous observation.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use temporalseries::series::TimeSeries;
+    ///
+    /// let ts = TimeSeries::new(
+    ///     vec![1, 2, 3],
+    ///     vec![100.0, 110.0, 121.0]
+    /// );
+    ///
+    /// let returns = ts.pct_change();
+    ///
+    /// assert!((returns.values[1] - 0.10).abs() < 1e-6);
+    /// ```
+    ///
+    /// # Returns
+    ///
+    /// A new `TimeSeries` containing percentage returns.
+    ///
+    /// # Notes
+    ///
+    /// This function uses simple returns rather than logarithmic returns.
+    ///
+    /// See also: `log_returns()`
     pub fn pct_change(&self) -> Self {
         let mut values = vec![f64::NAN; self.len()];
         for i in 1..self.len() {
