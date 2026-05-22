@@ -1,3 +1,4 @@
+use crate::errors::TemporalSeriesError;
 use crate::rolling::RollingSeries;
 
 #[derive(Debug, Clone)]
@@ -7,16 +8,22 @@ pub struct TimeSeries {
 }
 
 impl TimeSeries {
-    pub fn new(index: Vec<i64>, values: Vec<f64>) -> Self {
-        assert_eq!(index.len(), values.len());
-        Self { index, values }
+    pub fn new(index: Vec<i64>, values: Vec<f64>) -> Result<Self, TemporalSeriesError> {
+        if index.len() != values.len() {
+            return Err(TemporalSeriesError::LengthMismatch {
+                index_len: index.len(),
+                values_len: values.len(),
+            });
+        }
+
+        Ok(Self { index, values })
     }
 
     pub fn len(&self) -> usize {
         self.values.len()
     }
 
-    pub fn shift(&self, periods: usize) -> Self {
+    pub fn shift(&self, periods: usize) -> Result<Self, TemporalSeriesError> {
         let mut values = vec![f64::NAN; self.len()];
         for i in periods..self.len() {
             values[i] = self.values[i - periods];
@@ -24,7 +31,7 @@ impl TimeSeries {
         Self::new(self.index.clone(), values)
     }
 
-    pub fn diff(&self) -> Self {
+    pub fn diff(&self) -> Result<Self, TemporalSeriesError> {
         let mut values = vec![f64::NAN; self.len()];
         for i in 1..self.len() {
             values[i] = self.values[i] - self.values[i - 1];
@@ -52,9 +59,9 @@ impl TimeSeries {
     /// let ts = TimeSeries::new(
     ///     vec![1, 2, 3],
     ///     vec![100.0, 110.0, 121.0]
-    /// );
+    /// ).unwrap();
     ///
-    /// let returns = ts.pct_change();
+    /// let returns = ts.pct_change().unwrap();
     ///
     /// assert!((returns.values[1] - 0.10).abs() < 1e-6);
     /// ```
@@ -68,7 +75,7 @@ impl TimeSeries {
     /// This function uses simple returns rather than logarithmic returns.
     ///
     /// See also: `log_returns()`
-    pub fn pct_change(&self) -> Self {
+    pub fn pct_change(&self) -> Result<Self, TemporalSeriesError> {
         let mut values = vec![f64::NAN; self.len()];
         for i in 1..self.len() {
             values[i] = self.values[i] / self.values[i - 1] - 1.0;

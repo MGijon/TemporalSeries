@@ -1,3 +1,4 @@
+use crate::errors::TemporalSeriesError;
 use crate::series::TimeSeries;
 
 pub struct RollingSeries<'a> {
@@ -10,7 +11,7 @@ impl<'a> RollingSeries<'a> {
         Self { series, window }
     }
 
-    pub fn mean(&self) -> TimeSeries {
+    pub fn mean(&self) -> Result<TimeSeries, TemporalSeriesError> {
         let n = self.series.len();
         let mut result = vec![f64::NAN; n];
 
