@@ -1,5 +1,5 @@
-use temporalseries::series::TimeSeries;
 use temporalseries::errors::TemporalSeriesError;
+use temporalseries::series::TimeSeries;
 
 #[test]
 #[allow(non_snake_case)]
@@ -12,5 +12,8 @@ fn test__given_different_lenght_vectors__when_create_new_ts__then_raise_LengthMi
     let result = TimeSeries::new(index, values);
 
     // Then
-    assert!(matches!(result, Err(TemporalSeriesError::LengthMismatch { .. })));
+    assert!(matches!(
+        result,
+        Err(TemporalSeriesError::LengthMismatch { .. })
+    ));
 }
