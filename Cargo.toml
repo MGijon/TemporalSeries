@@ -9,5 +9,12 @@ repository = "https://github.com/MGijon/TemporalSeries"
 [lib]
 path = "crates/lib.rs"
 
+[[bench]]
+name = "series"
+path = "benchmark/series.rs"
+harness = false
+
 [dependencies]
-criterion = "0.8.2"
+
+[dev-dependencies]
+criterion = { version = "0.8.2", features = ["html_reports"] }
