@@ -1,2 +1,3 @@
-pub mod rolling;
-pub use rolling::RollingSeries;
+pub mod core;
+
+pub use core::RollingSeries;

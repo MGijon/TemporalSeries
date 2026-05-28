@@ -1,3 +1,3 @@
-pub mod errors;
+pub mod types;
 
-pub use errors::TemporalSeriesError;
+pub use types::TemporalSeriesError;
