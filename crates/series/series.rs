@@ -86,4 +86,21 @@ impl TimeSeries {
     pub fn rolling(&self, window: usize) -> RollingSeries<'_> {
         RollingSeries::new(self, window)
     }
+
+    /// Returns `true` if the series contains no elements.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use temporalseries::series::TimeSeries;
+    ///
+    /// let empty = TimeSeries::new(vec![], vec![]).unwrap();
+    /// assert!(empty.is_empty());
+    ///
+    /// let ts = TimeSeries::new(vec![1], vec![1.0]).unwrap();
+    /// assert!(!ts.is_empty());
+    /// ```
+    pub fn is_empty(&self) -> bool {
+        self.values.is_empty()
+    }
 }
