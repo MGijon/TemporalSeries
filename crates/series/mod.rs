@@ -1,2 +1,3 @@
-pub mod series;
-pub use series::TimeSeries;
+pub mod core;
+
+pub use core::TimeSeries;
