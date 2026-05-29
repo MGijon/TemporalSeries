@@ -1,6 +1,32 @@
 use crate::errors::TemporalSeriesError;
 use crate::rolling::RollingSeries;
 
+/// A one-dimensional time series of floating-point observations.
+///
+/// A `TimeSeries` pairs an ordered sequence of integer timestamps (`index`)
+/// with a corresponding sequence of `f64` values. Both sequences must always
+/// have the same length — enforced at construction time by [`TimeSeries::new`].
+///
+/// # Fields
+///
+/// - `index` — monotonically increasing integer timestamps (e.g. Unix seconds,
+///   trading day offsets, or simple integer steps).
+/// - `values` — the observed values at each timestamp. `NaN` is used as a
+///   sentinel for missing or undefined observations (e.g. the first element
+///   after a [`TimeSeries::diff`] or [`TimeSeries::shift`]).
+///
+/// # Example
+///
+/// ```rust
+/// use temporalseries::series::TimeSeries;
+///
+/// let ts = TimeSeries::new(
+///     vec![1, 2, 3],
+///     vec![100.0, 110.0, 121.0],
+/// ).unwrap();
+///
+/// assert_eq!(ts.len(), 3);
+/// ```
 #[derive(Debug, Clone)]
 pub struct TimeSeries {
     pub index: Vec<i64>,
@@ -8,6 +34,24 @@ pub struct TimeSeries {
 }
 
 impl TimeSeries {
+    /// Creates a new `TimeSeries` from an index and a values vector.
+    ///
+    /// The index represents the time axis (e.g. timestamps, integer steps)
+    /// and must have the same length as `values`.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use temporalseries::series::TimeSeries;
+    ///
+    /// let ts = TimeSeries::new(vec![1, 2, 3], vec![10.0, 20.0, 30.0]).unwrap();
+    /// assert_eq!(ts.len(), 3);
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns [`TemporalSeriesError::LengthMismatch`] if `index` and `values`
+    /// have different lengths.
     pub fn new(index: Vec<i64>, values: Vec<f64>) -> Result<Self, TemporalSeriesError> {
         if index.len() != values.len() {
             return Err(TemporalSeriesError::LengthMismatch {
