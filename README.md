@@ -48,6 +48,13 @@ of `diff` or `pct_change`, or the first `window - 1` elements of a rolling mean)
 return `NaN` at that position rather than truncating the series. This keeps the
 output length equal to the input length and preserves index alignment.
 
+## Examples
+
+| Example | Command | Description |
+|---|---|---|
+| `basic` | `cargo run --example basic` | Constructs a series and computes `pct_change` followed by a rolling mean |
+| `input_output` | `cargo run --example input_output` | Reads a series from `examples/input.csv`, writes it to `examples/output.csv`, and reads it back |
+
 ## Development
 
 ```bash
