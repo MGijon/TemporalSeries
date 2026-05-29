@@ -41,6 +41,59 @@ match TimeSeries::new(vec![1, 2], vec![1.0]) {
 }
 ```
 
+## Storage backends
+
+`TemporalSeries<T, B>` is generic over its storage backend, so you can choose
+the in-memory layout that best fits your workload.
+
+### Columnar
+
+Values are stored in a single contiguous `Vec<T>`, separate from the index.
+This is the most cache-friendly layout for operations that scan the value
+column alone (aggregations, rolling windows).
+
+```rust
+use temporalseries::series::TemporalSeries;
+use temporalseries::storage::ColumnarBackend;
+
+let index: Vec<i64> = vec![1, 2, 3, 4, 5];
+let values: Vec<f64> = vec![10.0, 20.0, 30.0, 25.0, 35.0];
+
+let backend = ColumnarBackend::new(values);
+let series = TemporalSeries::new(index, backend).unwrap();
+
+println!("{:?}", series.get(2)); // Some(30.0)
+```
+
+### Row
+
+Each observation is stored as a `RowRecord { timestamp, value }`. This layout
+is a natural fit when data arrives record-by-record (database cursors, message
+streams) and keeps timestamps co-located with their values.
+
+```rust
+use temporalseries::series::TemporalSeries;
+use temporalseries::storage::{RowBackend, RowRecord};
+
+let rows: Vec<RowRecord<f64>> = vec![
+    RowRecord { timestamp: 1, value: 10.0 },
+    RowRecord { timestamp: 2, value: 20.0 },
+    RowRecord { timestamp: 3, value: 30.0 },
+];
+
+let index: Vec<i64> = rows.iter().map(|r| r.timestamp).collect();
+let backend = RowBackend::new(rows);
+let series = TemporalSeries::new(index, backend).unwrap();
+
+println!("{:?}", series.get(2)); // Some(30.0)
+```
+
+| | Columnar | Row |
+|---|---|---|
+| Memory layout | values packed, index separate | timestamp + value interleaved per record |
+| Best for | column scans, aggregations | record-at-a-time ingestion |
+| Extra allocation | separate index `Vec` | none beyond the records themselves |
+
 ## NaN convention
 
 Operations that cannot produce a value for a position (e.g. the first element
@@ -54,6 +107,8 @@ output length equal to the input length and preserves index alignment.
 |---|---|---|
 | `basic` | `cargo run --example basic` | Constructs a series and computes `pct_change` followed by a rolling mean |
 | `input_output` | `cargo run --example input_output` | Reads a series from `examples/input.csv`, writes it to `examples/output.csv`, and reads it back |
+| `temporal_series_with_columnar_backend` | `cargo run --example temporal_series_with_columnar_backend` | Builds a `TemporalSeries` with a `ColumnarBackend` and demonstrates access and iteration |
+| `temporal_series_with_row_backend` | `cargo run --example temporal_series_with_row_backend` | Builds a `TemporalSeries` with a `RowBackend` and demonstrates access and iteration |
 
 ## Development
 

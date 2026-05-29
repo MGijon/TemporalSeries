@@ -1,3 +1,5 @@
-pub mod core;
+pub mod temporal_series;
+pub mod time_series;
 
-pub use core::TimeSeries;
+pub use temporal_series::TemporalSeries;
+pub use time_series::TimeSeries;
