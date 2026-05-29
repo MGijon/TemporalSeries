@@ -147,9 +147,7 @@ impl TimeSeries {
     /// This function uses simple returns rather than logarithmic returns.
     pub fn pct_change(&self) -> Result<Self, TemporalSeriesError> {
         let mut values = vec![f64::NAN; self.len()];
-        //for i in 1..self.len() {
-        //    values[i] = self.values[i] / self.values[i - 1] - 1.0;
-        //}
+
         for (result, window) in values[1..].iter_mut().zip(self.values.windows(2)) {
             *result = window[1] / window[0] - 1.0;
         }
