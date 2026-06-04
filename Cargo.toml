@@ -24,6 +24,11 @@ name = "row_backend"
 path = "benchmark/row_backend.rs"
 harness = false
 
+[[bench]]
+name = "panel"
+path = "benchmark/panel.rs"
+harness = false
+
 [dependencies]
 
 [dev-dependencies]
