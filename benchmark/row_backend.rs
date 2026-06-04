@@ -6,7 +6,10 @@ fn bench_row_new(c: &mut Criterion) {
     c.bench_function("RowBackend::new 1000", |b| {
         b.iter(|| {
             let rows: Vec<RowRecord<f64>> = (0..1000)
-                .map(|i| RowRecord { timestamp: i, value: i as f64 })
+                .map(|i| RowRecord {
+                    timestamp: i,
+                    value: i as f64,
+                })
                 .collect();
             RowBackend::new(black_box(rows))
         })
@@ -15,7 +18,10 @@ fn bench_row_new(c: &mut Criterion) {
 
 fn bench_row_iter_sum(c: &mut Criterion) {
     let rows: Vec<RowRecord<f64>> = (0..1000)
-        .map(|i| RowRecord { timestamp: i, value: i as f64 })
+        .map(|i| RowRecord {
+            timestamp: i,
+            value: i as f64,
+        })
         .collect();
     let backend = RowBackend::new(rows);
 
@@ -26,7 +32,10 @@ fn bench_row_iter_sum(c: &mut Criterion) {
 
 fn bench_row_get(c: &mut Criterion) {
     let rows: Vec<RowRecord<f64>> = (0..1000)
-        .map(|i| RowRecord { timestamp: i, value: i as f64 })
+        .map(|i| RowRecord {
+            timestamp: i,
+            value: i as f64,
+        })
         .collect();
     let backend = RowBackend::new(rows);
 

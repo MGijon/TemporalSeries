@@ -31,5 +31,10 @@ fn bench_columnar_get(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, bench_columnar_new, bench_columnar_iter_sum, bench_columnar_get);
+criterion_group!(
+    benches,
+    bench_columnar_new,
+    bench_columnar_iter_sum,
+    bench_columnar_get
+);
 criterion_main!(benches);
