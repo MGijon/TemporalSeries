@@ -122,8 +122,27 @@ cargo clippy -- -D warnings
 # Open API docs
 cargo doc --open
 
-# Run benchmarks
+# Run all benchmarks
 cargo bench
+
+# Run a single benchmark target
+cargo bench --bench time_series
+cargo bench --bench columnar_backend
+cargo bench --bench row_backend
+
+# Open the HTML report in the browser (macOS)
+open target/criterion/report/index.html
+```
+
+Criterion writes an HTML report to `target/criterion/` after every run.
+Each benchmark target has its own sub-report, and there is a combined index at
+`target/criterion/report/index.html` that covers all targets.
+To open a single target's report directly:
+
+```bash
+open target/criterion/columnar_backend/report/index.html
+open target/criterion/row_backend/report/index.html
+open target/criterion/time_series/report/index.html
 ```
 
 ## License

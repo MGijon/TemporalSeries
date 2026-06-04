@@ -10,8 +10,18 @@ repository = "https://github.com/MGijon/TemporalSeries"
 path = "crates/lib.rs"
 
 [[bench]]
-name = "series"
-path = "benchmark/series.rs"
+name = "time_series"
+path = "benchmark/time_series.rs"
+harness = false
+
+[[bench]]
+name = "columnar_backend"
+path = "benchmark/columnar_backend.rs"
+harness = false
+
+[[bench]]
+name = "row_backend"
+path = "benchmark/row_backend.rs"
 harness = false
 
 [dependencies]
