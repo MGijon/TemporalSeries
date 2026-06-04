@@ -109,6 +109,7 @@ output length equal to the input length and preserves index alignment.
 | `input_output` | `cargo run --example input_output` | Reads a series from `examples/input.csv`, writes it to `examples/output.csv`, and reads it back |
 | `temporal_series_with_columnar_backend` | `cargo run --example temporal_series_with_columnar_backend` | Builds a `TemporalSeries` with a `ColumnarBackend` and demonstrates access and iteration |
 | `temporal_series_with_row_backend` | `cargo run --example temporal_series_with_row_backend` | Builds a `TemporalSeries` with a `RowBackend` and demonstrates access and iteration |
+| `panel` | `cargo run --example panel` | Builds a `Panel` of named series on a shared index and extracts one series for analysis |
 
 ## Development
 
