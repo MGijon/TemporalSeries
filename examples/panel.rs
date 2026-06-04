@@ -23,10 +23,7 @@ use temporalseries::panel::Panel;
 fn main() {
     let index = vec![1_i64, 2, 3];
     let symbols = vec!["AAPL".to_string(), "MSFT".to_string()];
-    let values = vec![
-        vec![150.0, 152.0, 149.0],
-        vec![300.0, 305.0, 298.0],
-    ];
+    let values = vec![vec![150.0, 152.0, 149.0], vec![300.0, 305.0, 298.0]];
 
     // Construction validates that every series length matches the index.
     let panel = Panel::new(index, symbols, values).unwrap();

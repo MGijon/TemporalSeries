@@ -85,7 +85,11 @@ impl Panel {
             }
         }
 
-        Ok(Self { index, symbols, values })
+        Ok(Self {
+            index,
+            symbols,
+            values,
+        })
     }
 
     /// Returns the number of time steps (rows) in the panel.
