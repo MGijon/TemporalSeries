@@ -4,3 +4,4 @@ pub mod panel;
 pub mod rolling;
 pub mod series;
 pub mod storage;
+pub mod time;
