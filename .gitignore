@@ -7,3 +7,6 @@
 .LSOverride
 .icloud
 *.icloud
+
+# test outputs
+test_output.csv
