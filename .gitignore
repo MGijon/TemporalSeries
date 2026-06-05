@@ -1,1 +1,9 @@
 /target
+
+# macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+.icloud
+*.icloud
