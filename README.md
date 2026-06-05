@@ -146,6 +146,31 @@ open target/criterion/row_backend/report/index.html
 open target/criterion/time_series/report/index.html
 ```
 
+### Coverage
+
+Prerequisites (one-time setup):
+
+```bash
+rustup component add llvm-tools-preview
+cargo install cargo-llvm-cov
+```
+
+```bash
+# Print a coverage summary to the terminal
+cargo llvm-cov
+
+# Generate an HTML report
+cargo llvm-cov --html
+
+# Open the report in the browser (macOS)
+open target/llvm-cov/html/index.html
+```
+
+The HTML report is also generated automatically in CI on every push and pull
+request to `main`. It is uploaded as the `coverage-report` artifact and kept
+for **15 days**. Download it from the **Actions** tab of the repository, open
+the run, and grab the artifact from the summary page.
+
 ## License
 
 MIT
