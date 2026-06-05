@@ -4,6 +4,68 @@ All notable changes to this project will be documented in this file.
 
 The format is loosely based on Keep a Changelog and Semantic Versioning.
 
+## [0.1.1] - 2026-06-05
+
+### Added
+
+#### Timestamp units (`chrono` feature)
+
+- `crates/time/` module with a `TimeUnit` enum (`Seconds`, `Milliseconds`,
+  `Microseconds`, `Nanoseconds`) that records the unit of the `i64` index.
+- `TemporalSeries::with_unit` — consuming builder to attach a `TimeUnit` after
+  construction; always available.
+- `TemporalSeries::time_unit` — accessor that returns `Option<&TimeUnit>`;
+  always available.
+- `TemporalSeries::from_datetimes` — construct a series directly from
+  `Vec<chrono::DateTime<Utc>>`, converting to `i64` automatically; requires
+  `--features chrono`.
+- `TemporalSeries::datetimes` — convert the stored `i64` index back to
+  `Vec<DateTime<Utc>>`; requires `--features chrono`.
+- `temporal_series_with_chrono` example — demonstrates `from_datetimes`,
+  `datetimes`, and `with_unit`; run with
+  `cargo run --example temporal_series_with_chrono --features chrono`.
+- `chrono` is an optional dependency behind the `chrono` feature flag; not
+  compiled into the library unless explicitly enabled.
+
+#### Test suite
+
+- Error tests — one file per `TemporalSeriesError` variant
+  (`test_length_mismatch`, `test_empty_series`, `test_invalid_window`,
+  `test_io_error`, `test_parse_error`), each covering `Display`, `Debug`,
+  and `source()`.
+- Storage tests — `test_columnar` and `test_row` covering construction,
+  `get`, `push`, `slice`, `iter`, and `is_empty` for both backends.
+- Panel tests — construction, length invariant validation, `get_series`,
+  `symbols`, `shape`, and `is_empty`.
+- Rolling tests — `rolling().mean()` correctness, output length, index
+  preservation, and `NaN` fill for the warm-up window.
+- I/O tests — `read_csv` happy path and missing-file error; `write_csv`
+  happy path and invalid-path error.
+- Time tests — `TimeUnit::from_datetime` and `to_datetime` for all four
+  variants, round-trips, and negative timestamps (before the Unix epoch);
+  gated with `#![cfg(feature = "chrono")]`.
+
+#### Code coverage
+
+- `cargo-llvm-cov` integration: `cargo llvm-cov --html --features chrono`
+  generates an HTML report at `target/llvm-cov/html/index.html`.
+- CI `coverage` job generates the report on every push and pull request to
+  `main`, uploading it as the `coverage-report` artifact with a 15-day
+  retention period.
+
+### Changed
+
+- `.gitignore` extended with macOS cloud-sync artifact patterns
+  (`.DS_Store`, `._*`, `.AppleDouble`, `.LSOverride`, `.icloud`, `*.icloud`).
+
+### Fixed
+
+- `tests/errors/test_parse_error` — temp file written to `std::env::temp_dir()`
+  instead of a hard-coded relative path, fixing the test on CI where the
+  `tests/fixtures/` directory does not exist.
+
+---
+
 ## [0.1.0] - 2026-06-04
 
 ### Added
