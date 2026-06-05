@@ -30,6 +30,16 @@ path = "benchmark/panel.rs"
 harness = false
 
 [dependencies]
+chrono = { version = "0.4", optional = true }
+
+[features]
+chrono = ["dep:chrono"]
+
+[[example]]
+name = "temporal_series_with_chrono"
+path = "examples/temporal_series_with_chrono.rs"
+required-features = ["chrono"]
 
 [dev-dependencies]
 criterion = { version = "0.8.2", features = ["html_reports"] }
+chrono = { version = "0.4" }

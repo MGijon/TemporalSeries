@@ -94,6 +94,74 @@ println!("{:?}", series.get(2)); // Some(30.0)
 | Best for | column scans, aggregations | record-at-a-time ingestion |
 | Extra allocation | separate index `Vec` | none beyond the records themselves |
 
+## Timestamp units (`chrono` feature)
+
+Timestamps are always stored as `i64` integers. The optional `chrono` feature
+adds [`TimeUnit`] — an enum that records the unit the integers are expressed in
+— and two convenience methods on `TemporalSeries` that convert between `i64`
+and [`chrono::DateTime<Utc>`].
+
+Enable the feature in your `Cargo.toml`:
+
+```toml
+temporalseries = { version = "0.1", features = ["chrono"] }
+```
+
+### Build from `DateTime<Utc>` values
+
+```rust
+use chrono::{TimeZone, Utc};
+use temporalseries::series::TemporalSeries;
+use temporalseries::storage::ColumnarBackend;
+use temporalseries::time::TimeUnit;
+
+let datetimes = vec![
+    Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap(),
+    Utc.with_ymd_and_hms(2024, 1, 2, 0, 0, 0).unwrap(),
+];
+
+let series = TemporalSeries::from_datetimes(
+    datetimes,
+    ColumnarBackend::new(vec![150.0_f64, 152.5]),
+    TimeUnit::Seconds,
+).unwrap();
+
+println!("{:?}", series.index); // [1704067200, 1704153600]
+```
+
+### Attach a unit to an existing `i64` index
+
+```rust
+use temporalseries::series::TemporalSeries;
+use temporalseries::storage::ColumnarBackend;
+use temporalseries::time::TimeUnit;
+
+let series = TemporalSeries::new(
+    vec![0_i64, 1_000, 2_000],          // milliseconds
+    ColumnarBackend::new(vec![1.0_f64, 2.0, 3.0]),
+)
+.unwrap()
+.with_unit(TimeUnit::Milliseconds);
+
+// Convert the index back to DateTime<Utc>
+let dts = series.datetimes().unwrap();
+println!("{}", dts[1]); // 1970-01-01 00:00:01 UTC
+```
+
+### Available units
+
+| Variant | Epoch reference | Typical use |
+|---|---|---|
+| `TimeUnit::Seconds` | Unix seconds | Databases, REST APIs |
+| `TimeUnit::Milliseconds` | Unix milliseconds | JavaScript dates, most financial feeds |
+| `TimeUnit::Microseconds` | Unix microseconds | High-frequency trading, system logs |
+| `TimeUnit::Nanoseconds` | Unix nanoseconds | Kernel tracing (overflows past ~year 2262) |
+
+### Without the feature
+
+`TimeUnit`, `with_unit`, and `time_unit()` are always available. Only
+`from_datetimes` and `datetimes` require `--features chrono`.
+
 ## NaN convention
 
 Operations that cannot produce a value for a position (e.g. the first element
@@ -110,6 +178,7 @@ output length equal to the input length and preserves index alignment.
 | `temporal_series_with_columnar_backend` | `cargo run --example temporal_series_with_columnar_backend` | Builds a `TemporalSeries` with a `ColumnarBackend` and demonstrates access and iteration |
 | `temporal_series_with_row_backend` | `cargo run --example temporal_series_with_row_backend` | Builds a `TemporalSeries` with a `RowBackend` and demonstrates access and iteration |
 | `panel` | `cargo run --example panel` | Builds a `Panel` of named series on a shared index and extracts one series for analysis |
+| `temporal_series_with_chrono` | `cargo run --example temporal_series_with_chrono --features chrono` | Builds a `TemporalSeries` from `DateTime<Utc>` values and round-trips the index back to calendar dates |
 
 ## Development
 
@@ -159,8 +228,8 @@ cargo install cargo-llvm-cov
 # Print a coverage summary to the terminal
 cargo llvm-cov
 
-# Generate an HTML report
-cargo llvm-cov --html
+# Generate an HTML report (all features)
+cargo llvm-cov --html --features chrono
 
 # Open the report in the browser (macOS)
 open target/llvm-cov/html/index.html
