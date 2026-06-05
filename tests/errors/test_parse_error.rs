@@ -7,13 +7,13 @@ use temporalseries::io::read_csv;
 #[test]
 #[allow(non_snake_case)]
 fn test__given_malformed_csv__when_read_csv__then_raises_ParseError() {
-    // Given
-    let path = "tests/fixtures/malformed.csv";
-    fs::write(path, "index,value\nnot_a_number,1.0\n").unwrap();
+    // Given — write to the system temp dir so the path always exists in CI
+    let path = std::env::temp_dir().join("temporalseries_malformed_test.csv");
+    fs::write(&path, "index,value\nnot_a_number,1.0\n").unwrap();
 
     // When
-    let result = read_csv(path);
-    fs::remove_file(path).unwrap();
+    let result = read_csv(path.to_str().unwrap());
+    fs::remove_file(&path).unwrap();
 
     // Then
     assert!(matches!(result, Err(TemporalSeriesError::ParseError(_))));
