@@ -196,7 +196,12 @@ impl TimeSeries {
             )));
         }
 
-        let mut sorted: Vec<f64> = self.values.iter().copied().filter(|v| !v.is_nan()).collect();
+        let mut sorted: Vec<f64> = self
+            .values
+            .iter()
+            .copied()
+            .filter(|v| !v.is_nan())
+            .collect();
         if sorted.is_empty() {
             return Err(TemporalSeriesError::EmptySeries);
         }

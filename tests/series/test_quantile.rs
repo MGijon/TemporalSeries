@@ -37,13 +37,14 @@ fn test__given_ordered_series__when_compute_quantile__then_returns_correct_value
     // p=0.5  -> h=2.0 -> sorted[2] = 3.0
     // p=0.75 -> h=3.0 -> sorted[3] = 4.0
     // p=1.0  -> h=4.0 -> sorted[4] = 5.0
-    let sut: TimeSeries = TimeSeries::new(vec![1, 2, 3, 4, 5], vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
+    let sut: TimeSeries =
+        TimeSeries::new(vec![1, 2, 3, 4, 5], vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
 
     // When
-    let result_p0:   Result<f64, TemporalSeriesError> = sut.quantile(0.0);
-    let result_p25:  Result<f64, TemporalSeriesError> = sut.quantile(0.25);
-    let result_p50:  Result<f64, TemporalSeriesError> = sut.quantile(0.5);
-    let result_p75:  Result<f64, TemporalSeriesError> = sut.quantile(0.75);
+    let result_p0: Result<f64, TemporalSeriesError> = sut.quantile(0.0);
+    let result_p25: Result<f64, TemporalSeriesError> = sut.quantile(0.25);
+    let result_p50: Result<f64, TemporalSeriesError> = sut.quantile(0.5);
+    let result_p75: Result<f64, TemporalSeriesError> = sut.quantile(0.75);
     let result_p100: Result<f64, TemporalSeriesError> = sut.quantile(1.0);
 
     // Then
@@ -74,13 +75,14 @@ fn test__given_even_length_series__when_compute_median__then_interpolates_correc
 fn test__given_unordered_series__when_compute_quantile__then_sorts_before_computing() {
     // Given
     // Same values as ordered test but shuffled — result must be identical
-    let sut: TimeSeries = TimeSeries::new(vec![1, 2, 3, 4, 5], vec![5.0, 3.0, 1.0, 4.0, 2.0]).unwrap();
+    let sut: TimeSeries =
+        TimeSeries::new(vec![1, 2, 3, 4, 5], vec![5.0, 3.0, 1.0, 4.0, 2.0]).unwrap();
 
     // When
-    let result_p0:   Result<f64, TemporalSeriesError> = sut.quantile(0.0);
-    let result_p25:  Result<f64, TemporalSeriesError> = sut.quantile(0.25);
-    let result_p50:  Result<f64, TemporalSeriesError> = sut.quantile(0.5);
-    let result_p75:  Result<f64, TemporalSeriesError> = sut.quantile(0.75);
+    let result_p0: Result<f64, TemporalSeriesError> = sut.quantile(0.0);
+    let result_p25: Result<f64, TemporalSeriesError> = sut.quantile(0.25);
+    let result_p50: Result<f64, TemporalSeriesError> = sut.quantile(0.5);
+    let result_p75: Result<f64, TemporalSeriesError> = sut.quantile(0.75);
     let result_p100: Result<f64, TemporalSeriesError> = sut.quantile(1.0);
 
     // Then
@@ -98,7 +100,7 @@ fn test__given_boundary_p_values__when_compute_quantile__then_returns_ok() {
     let sut: TimeSeries = TimeSeries::new(vec![1, 2, 3], vec![1.0, 2.0, 3.0]).unwrap();
 
     // When
-    let result_p0:   Result<f64, TemporalSeriesError> = sut.quantile(0.0);
+    let result_p0: Result<f64, TemporalSeriesError> = sut.quantile(0.0);
     let result_p100: Result<f64, TemporalSeriesError> = sut.quantile(1.0);
 
     // Then
@@ -120,8 +122,20 @@ fn test__given_invalid_p__when_compute_quantile__then_returns_parameter_range_er
     let result_sut_2_above_1: Result<f64, TemporalSeriesError> = sut_2.quantile(1.1);
 
     // Then
-    assert!(matches!(result_sut_1_below_0, Err(TemporalSeriesError::ParameterRangeError(_))));
-    assert!(matches!(result_sut_1_above_1, Err(TemporalSeriesError::ParameterRangeError(_))));
-    assert!(matches!(result_sut_2_below_0, Err(TemporalSeriesError::ParameterRangeError(_))));
-    assert!(matches!(result_sut_2_above_1, Err(TemporalSeriesError::ParameterRangeError(_))));
+    assert!(matches!(
+        result_sut_1_below_0,
+        Err(TemporalSeriesError::ParameterRangeError(_))
+    ));
+    assert!(matches!(
+        result_sut_1_above_1,
+        Err(TemporalSeriesError::ParameterRangeError(_))
+    ));
+    assert!(matches!(
+        result_sut_2_below_0,
+        Err(TemporalSeriesError::ParameterRangeError(_))
+    ));
+    assert!(matches!(
+        result_sut_2_above_1,
+        Err(TemporalSeriesError::ParameterRangeError(_))
+    ));
 }
