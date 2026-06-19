@@ -94,10 +94,15 @@ impl TimeSeries {
         self.values.is_empty()
     }
 
-    /// Returns the value of the mean estimator.
+    /// Returns the arithmetic mean of the series.
     ///
-    /// TODO: check that this formula is working properly
-    /// $$ \hat{\mu} = \frac{1}{n} \sum^{n}_{i=0} x_i$$
+    /// # Formula
+    ///
+    /// $$\hat{\mu} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
+    ///
+    /// where `n` is the number of observations.
+    ///
+    /// # Examples
     ///
     /// ```rust
     /// use temporalseries::series::TimeSeries;
