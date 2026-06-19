@@ -257,6 +257,8 @@ output length equal to the input length and preserves index alignment.
 | `temporal_series_with_row_backend` | `cargo run --example temporal_series_with_row_backend` | Builds a `TemporalSeries` with a `RowBackend` and demonstrates access and iteration |
 | `panel` | `cargo run --example panel` | Builds a `Panel` of named series on a shared index and extracts one series for analysis |
 | `temporal_series_with_chrono` | `cargo run --example temporal_series_with_chrono --features chrono` | Builds a `TemporalSeries` from `DateTime<Utc>` values and round-trips the index back to calendar dates |
+| `dickey_fuller_test` | `cargo run --example dickey_fuller_test` | Contrasts a trending (non-stationary) series and an alternating (stationary) series using the Dickey-Fuller test |
+| `jarque_bera_test` | `cargo run --example jarque_bera_test` | Contrasts a near-symmetric series and a heavily skewed series using the Jarque-Bera normality test |
 
 ## Development
 
