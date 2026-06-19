@@ -49,5 +49,8 @@ fn test__given_window_larger_than_series__when_compute_moving_average__then_retu
     let result: Result<TimeSeries, TemporalSeriesError> = sut.moving_average(5);
 
     // Then
-    assert!(matches!(result, Err(TemporalSeriesError::InvalidWindow { .. })));
+    assert!(matches!(
+        result,
+        Err(TemporalSeriesError::InvalidWindow { .. })
+    ));
 }

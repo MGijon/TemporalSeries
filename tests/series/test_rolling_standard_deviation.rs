@@ -4,8 +4,7 @@ use temporalseries::{errors::TemporalSeriesError, series::TimeSeries};
 #[allow(non_snake_case)]
 fn test__given_constant_series__when_compute_rolling_std__then_returns_zeros() {
     // Given
-    let sut: TimeSeries =
-        TimeSeries::new(vec![1, 2, 3, 4], vec![5.0, 5.0, 5.0, 5.0]).unwrap();
+    let sut: TimeSeries = TimeSeries::new(vec![1, 2, 3, 4], vec![5.0, 5.0, 5.0, 5.0]).unwrap();
 
     // When
     let result: Result<TimeSeries, TemporalSeriesError> = sut.rolling_standard_deviation(2);

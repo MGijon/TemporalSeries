@@ -21,8 +21,7 @@ fn test__given_constant_series__when_compute_log_return__then_all_returns_are_ze
 fn test__given_series_with_e_ratio__when_compute_log_return__then_returns_one() {
     // Given
     // ln(e / 1) = 1.0
-    let sut: TimeSeries =
-        TimeSeries::new(vec![1, 2], vec![1.0, std::f64::consts::E]).unwrap();
+    let sut: TimeSeries = TimeSeries::new(vec![1, 2], vec![1.0, std::f64::consts::E]).unwrap();
 
     // When
     let result: Result<TimeSeries, TemporalSeriesError> = sut.log_return();

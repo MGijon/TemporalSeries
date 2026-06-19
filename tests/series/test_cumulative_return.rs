@@ -18,8 +18,7 @@ fn test__given_constant_series__when_compute_cumulative_return__then_returns_zer
 fn test__given_growing_series__when_compute_cumulative_return__then_computes_correctly() {
     // Given
     // (121 - 100) / 100 = 0.21
-    let sut: TimeSeries =
-        TimeSeries::new(vec![1, 2, 3], vec![100.0, 110.0, 121.0]).unwrap();
+    let sut: TimeSeries = TimeSeries::new(vec![1, 2, 3], vec![100.0, 110.0, 121.0]).unwrap();
 
     // When
     let result: Result<f64, TemporalSeriesError> = sut.cumulative_return();

@@ -49,5 +49,8 @@ fn test__given_invalid_window__when_compute_bollinger_bands__then_returns_error(
         sut.bollinger_bands(5, 2.0);
 
     // Then
-    assert!(matches!(result, Err(TemporalSeriesError::InvalidWindow { .. })));
+    assert!(matches!(
+        result,
+        Err(TemporalSeriesError::InvalidWindow { .. })
+    ));
 }

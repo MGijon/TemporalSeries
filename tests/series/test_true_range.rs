@@ -21,8 +21,7 @@ fn test__given_constant_series__when_compute_true_range__then_returns_zeros() {
 fn test__given_growing_series__when_compute_true_range__then_computes_correctly() {
     // Given
     // |3-1|=2, |6-3|=3, |10-6|=4
-    let sut: TimeSeries =
-        TimeSeries::new(vec![1, 2, 3, 4], vec![1.0, 3.0, 6.0, 10.0]).unwrap();
+    let sut: TimeSeries = TimeSeries::new(vec![1, 2, 3, 4], vec![1.0, 3.0, 6.0, 10.0]).unwrap();
 
     // When
     let result: Result<TimeSeries, TemporalSeriesError> = sut.true_range();
@@ -40,8 +39,7 @@ fn test__given_growing_series__when_compute_true_range__then_computes_correctly(
 fn test__given_falling_series__when_compute_true_range__then_returns_absolute_values() {
     // Given
     // True range is always non-negative: |4-10|=6, |2-4|=2
-    let sut: TimeSeries =
-        TimeSeries::new(vec![1, 2, 3], vec![10.0, 4.0, 2.0]).unwrap();
+    let sut: TimeSeries = TimeSeries::new(vec![1, 2, 3], vec![10.0, 4.0, 2.0]).unwrap();
 
     // When
     let result: Result<TimeSeries, TemporalSeriesError> = sut.true_range();

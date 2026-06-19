@@ -407,7 +407,10 @@ impl TimeSeries {
     /// assert_eq!(ema.values[1], 1.5);   // 0.5*2 + 0.5*1
     /// assert_eq!(ema.values[2], 2.25);  // 0.5*3 + 0.5*1.5
     /// ```
-    pub fn exponential_moving_average(&self, span: usize) -> Result<TimeSeries, TemporalSeriesError> {
+    pub fn exponential_moving_average(
+        &self,
+        span: usize,
+    ) -> Result<TimeSeries, TemporalSeriesError> {
         if self.is_empty() {
             return Err(TemporalSeriesError::EmptySeries);
         }
@@ -445,7 +448,11 @@ impl TimeSeries {
     ///
     /// assert!(sig.values.iter().all(|&v| v == 0.0));
     /// ```
-    pub fn crossover_signal(&self, fast: usize, slow: usize) -> Result<TimeSeries, TemporalSeriesError> {
+    pub fn crossover_signal(
+        &self,
+        fast: usize,
+        slow: usize,
+    ) -> Result<TimeSeries, TemporalSeriesError> {
         if fast >= slow {
             return Err(TemporalSeriesError::ParameterRangeError(format!(
                 "fast window ({fast}) must be smaller than slow window ({slow})"
@@ -727,15 +734,15 @@ impl TimeSeries {
         // Levinson-Durbin: phi[j] holds the AR coefficients for the current order.
         let mut phi: Vec<f64> = vec![acf[0]];
         for k in 1..lag {
-            let num: f64 =
-                acf[k] - (0..k).map(|j| phi[j] * acf[k - 1 - j]).sum::<f64>();
-            let den: f64 =
-                1.0 - (0..k).map(|j| phi[j] * acf[j]).sum::<f64>();
-            let phi_kk: f64 = if den.abs() < f64::EPSILON { 0.0 } else { num / den };
+            let num: f64 = acf[k] - (0..k).map(|j| phi[j] * acf[k - 1 - j]).sum::<f64>();
+            let den: f64 = 1.0 - (0..k).map(|j| phi[j] * acf[j]).sum::<f64>();
+            let phi_kk: f64 = if den.abs() < f64::EPSILON {
+                0.0
+            } else {
+                num / den
+            };
             let prev: Vec<f64> = phi.clone();
-            let updated: Vec<f64> = (0..k)
-                .map(|j| prev[j] - phi_kk * prev[k - 1 - j])
-                .collect();
+            let updated: Vec<f64> = (0..k).map(|j| prev[j] - phi_kk * prev[k - 1 - j]).collect();
             phi = updated;
             phi.push(phi_kk);
         }
@@ -759,7 +766,9 @@ impl TimeSeries {
         if n < 3 {
             return Err(TemporalSeriesError::EmptySeries);
         }
-        let delta: Vec<f64> = (1..n).map(|t| self.values[t] - self.values[t - 1]).collect();
+        let delta: Vec<f64> = (1..n)
+            .map(|t| self.values[t] - self.values[t - 1])
+            .collect();
         let lagged: Vec<f64> = (0..n - 1).map(|t| self.values[t]).collect();
 
         let ss_xy: f64 = lagged.iter().zip(delta.iter()).map(|(x, y)| x * y).sum();
@@ -815,7 +824,7 @@ impl TimeSeries {
         let critical_value: f64 = match alpha {
             a if a <= 0.01 => -2.60,
             a if a <= 0.05 => -1.95,
-            _              => -1.61,
+            _ => -1.61,
         };
         let statistic: f64 = self.stationary_dickey_fuller_statistics()?;
         Ok(statistic < critical_value)
@@ -945,7 +954,7 @@ impl TimeSeries {
         let critical_value: f64 = match alpha {
             a if a <= 0.01 => 9.210,
             a if a <= 0.05 => 5.991,
-            _              => 4.605,
+            _ => 4.605,
         };
         let jb: f64 = self.jacque_bera_statistics()?;
         Ok(jb < critical_value)

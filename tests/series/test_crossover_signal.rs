@@ -22,9 +22,11 @@ fn test__given_series_with_bullish_crossover__when_compute_crossover_signal__the
     // Given
     // Falling then rising: fast MA (2) crosses above slow MA (3) partway through.
     // [3,2,1,2,3,4,5]: fast crosses slow after the trough.
-    let sut: TimeSeries =
-        TimeSeries::new(vec![1, 2, 3, 4, 5, 6, 7], vec![3.0, 2.0, 1.0, 2.0, 3.0, 4.0, 5.0])
-            .unwrap();
+    let sut: TimeSeries = TimeSeries::new(
+        vec![1, 2, 3, 4, 5, 6, 7],
+        vec![3.0, 2.0, 1.0, 2.0, 3.0, 4.0, 5.0],
+    )
+    .unwrap();
 
     // When
     let result: Result<TimeSeries, TemporalSeriesError> = sut.crossover_signal(2, 3);

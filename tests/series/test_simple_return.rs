@@ -21,8 +21,7 @@ fn test__given_constant_series__when_compute_simple_return__then_all_returns_are
 fn test__given_growing_series__when_compute_simple_return__then_computes_correctly() {
     // Given
     // [100, 110, 121] -> r_1 = (110-100)/100 = 0.1, r_2 = (121-110)/110 = 0.1
-    let sut: TimeSeries =
-        TimeSeries::new(vec![1, 2, 3], vec![100.0, 110.0, 121.0]).unwrap();
+    let sut: TimeSeries = TimeSeries::new(vec![1, 2, 3], vec![100.0, 110.0, 121.0]).unwrap();
 
     // When
     let result: Result<TimeSeries, TemporalSeriesError> = sut.simple_return();
