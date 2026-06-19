@@ -6,7 +6,10 @@ pub enum TemporalSeriesError {
     /// `index` and `values` have different lengths.
     ///
     /// Both must have the same length to form a valid [`TimeSeries`](crate::series::TimeSeries).
-    LengthMismatch { index_len: usize, values_len: usize },
+    LengthMismatch {
+        index_len: usize,
+        values_len: usize,
+    },
 
     /// The series contains no elements.
     EmptySeries,
@@ -15,7 +18,10 @@ pub enum TemporalSeriesError {
     ///
     /// A window of size `window` requires at least `window` observations,
     /// but the series only has `series_len`.
-    InvalidWindow { window: usize, series_len: usize },
+    InvalidWindow {
+        window: usize,
+        series_len: usize,
+    },
 
     /// A filesystem or IO operation failed.
     ///
@@ -27,6 +33,8 @@ pub enum TemporalSeriesError {
     ///
     /// The message includes the line number and the offending value.
     ParseError(String),
+
+    ParameterRangeError(String),
 }
 
 impl fmt::Display for TemporalSeriesError {
@@ -55,6 +63,9 @@ impl fmt::Display for TemporalSeriesError {
             }
             TemporalSeriesError::ParseError(msg) => {
                 write!(f, "parse error: {msg}")
+            }
+            TemporalSeriesError::ParameterRangeError(msg) => {
+                write!(f, "parameter out of valid range: {msg}")
             }
         }
     }

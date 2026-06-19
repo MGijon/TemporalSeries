@@ -3,6 +3,8 @@ name: Benchmarks
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**/*.md"
 
 env:
   CARGO_TERM_COLOR: always

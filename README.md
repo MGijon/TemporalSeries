@@ -4,10 +4,47 @@ A Rust library for quantitative time-series analysis.
 
 ## Features
 
-- Percentage change (`pct_change`)
+**Series types**
+- `TimeSeries` — concrete series with a `Vec<i64>` index and `Vec<f64>` values
+- `TemporalSeries<T, B>` — generic over value type and storage backend (`ColumnarBackend`, `RowBackend`)
+- `Panel` — collection of named series on a shared index; all analytical methods applied column-by-column
+
+**Statistics**
+- Arithmetic mean (`mean`)
+- Sample standard deviation (`std_deviation`)
+- Quantile with linear interpolation (`quantile`)
+- Interquartile range (`iqr`)
+
+**Returns & transformations**
+- Simple return (`simple_return`)
+- Logarithmic return (`log_return`)
+- Cumulative return (`cumulative_return`)
 - First-order difference (`diff`)
+- Percentage change (`pct_change`)
 - Lag / forward shift (`shift`)
-- Rolling window mean (`rolling().mean()`)
+
+**Moving averages**
+- Simple moving average (`moving_average`)
+- Exponential moving average (`exponential_moving_average`)
+- MA crossover signal (`crossover_signal`)
+
+**Volatility**
+- Rolling standard deviation (`rolling_standard_deviation`)
+- True range (`true_range`)
+- Average true range (`average_true_range`)
+- Bollinger Bands (`bollinger_bands`)
+
+**Autocorrelation**
+- Autocorrelation function (`autocorrelation_function`)
+- Partial autocorrelation via Levinson-Durbin (`partial_autocorrelation_function`)
+
+**Statistical tests**
+- Augmented Dickey-Fuller stationarity test (`stationary_dickey_fuller_test`)
+- Jarque-Bera normality test (`jacque_bera_test`)
+
+**Distribution**
+- Fisher-Pearson skewness (`skewness`)
+- Excess kurtosis (`excess_kurtosis`)
 
 ## Usage
 
@@ -162,6 +199,84 @@ println!("{}", dts[1]); // 1970-01-01 00:00:01 UTC
 `TimeUnit`, `with_unit`, and `time_unit()` are always available. Only
 `from_datetimes` and `datetimes` require `--features chrono`.
 
+## Statistical Tests
+
+### Augmented Dickey-Fuller (stationarity)
+
+`stationary_dickey_fuller_test(alpha)` tests whether a series is stationary — i.e., its statistical properties do not change over time. Stationarity is a prerequisite for many forecasting models.
+
+**How it works:** the test fits an OLS regression of the form
+
+```
+Δxₜ = γ · xₜ₋₁ + εₜ
+```
+
+and computes the t-statistic `γ̂ / SE(γ̂)`. Under the null hypothesis (unit root, non-stationary), this statistic follows a non-standard Dickey-Fuller distribution. The null is rejected — and stationarity is concluded — when the statistic falls below the critical value for the chosen significance level.
+
+| `alpha` | Critical value |
+|---------|---------------|
+| `0.01`  | −2.60         |
+| `0.05`  | −1.95         |
+| `0.10`  | −1.61         |
+
+Returns `true` when the series is stationary (null rejected), `false` otherwise.
+
+```rust
+use temporalseries::series::TimeSeries;
+
+// A trending series is NOT stationary
+let trend = TimeSeries::new(
+    vec![1, 2, 3, 4, 5, 6, 7, 8],
+    vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0],
+).unwrap();
+assert!(!trend.stationary_dickey_fuller_test(0.05).unwrap());
+
+// An alternating series IS stationary
+let alternating = TimeSeries::new(
+    vec![1, 2, 3, 4, 5, 6, 7, 8],
+    vec![1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0],
+).unwrap();
+assert!(alternating.stationary_dickey_fuller_test(0.05).unwrap());
+```
+
+### Jarque-Bera (normality)
+
+`jacque_bera_test(alpha)` tests whether a series follows a normal distribution, using its skewness and excess kurtosis. It is commonly applied to residuals from regression or time-series models.
+
+**How it works:** the Jarque-Bera statistic is
+
+```
+JB = n · (S² / 6 + K² / 24)
+```
+
+where `S` is the Fisher-Pearson skewness and `K` is the excess kurtosis. Under the null hypothesis of normality, `JB` follows a χ²(2) distribution.
+
+| `alpha` | χ²(2) critical value |
+|---------|--------------------|
+| `0.01`  | 9.210              |
+| `0.05`  | 5.991              |
+| `0.10`  | 4.605              |
+
+Returns `true` when the series is consistent with normality (null not rejected), `false` when normality is rejected.
+
+```rust
+use temporalseries::series::TimeSeries;
+
+// A near-symmetric series is consistent with normality
+let normal_like = TimeSeries::new(
+    vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    vec![-2.0, -1.0, -0.5, 0.0, 0.2, 0.3, 0.5, 1.0, 1.5, 2.0],
+).unwrap();
+assert!(normal_like.jacque_bera_test(0.05).unwrap());
+
+// A heavily skewed series is NOT consistent with normality
+let skewed = TimeSeries::new(
+    vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    vec![1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 100.0],
+).unwrap();
+assert!(!skewed.jacque_bera_test(0.05).unwrap());
+```
+
 ## NaN convention
 
 Operations that cannot produce a value for a position (e.g. the first element
@@ -177,8 +292,10 @@ output length equal to the input length and preserves index alignment.
 | `input_output` | `cargo run --example input_output` | Reads a series from `examples/input.csv`, writes it to `examples/output.csv`, and reads it back |
 | `temporal_series_with_columnar_backend` | `cargo run --example temporal_series_with_columnar_backend` | Builds a `TemporalSeries` with a `ColumnarBackend` and demonstrates access and iteration |
 | `temporal_series_with_row_backend` | `cargo run --example temporal_series_with_row_backend` | Builds a `TemporalSeries` with a `RowBackend` and demonstrates access and iteration |
-| `panel` | `cargo run --example panel` | Builds a `Panel` of named series on a shared index and extracts one series for analysis |
+| `panel` | `cargo run --example panel` | Builds a `Panel` of named series on a shared index and demonstrates all analytical methods (statistics, returns, moving averages, volatility, autocorrelation, stationarity, and normality) applied column-by-column |
 | `temporal_series_with_chrono` | `cargo run --example temporal_series_with_chrono --features chrono` | Builds a `TemporalSeries` from `DateTime<Utc>` values and round-trips the index back to calendar dates |
+| `dickey_fuller_test` | `cargo run --example dickey_fuller_test` | Contrasts a trending vs. alternating series with the Dickey-Fuller test, shown for both `TimeSeries` and `TemporalSeries` |
+| `jarque_bera_test` | `cargo run --example jarque_bera_test` | Contrasts a near-symmetric vs. heavily skewed series with the Jarque-Bera test, shown for both `TimeSeries` and `TemporalSeries` |
 
 ## Development
 
