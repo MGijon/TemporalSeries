@@ -4,10 +4,47 @@ A Rust library for quantitative time-series analysis.
 
 ## Features
 
-- Percentage change (`pct_change`)
+**Series types**
+- `TimeSeries` — concrete series with a `Vec<i64>` index and `Vec<f64>` values
+- `TemporalSeries<T, B>` — generic over value type and storage backend (`ColumnarBackend`, `RowBackend`)
+- `Panel` — collection of named series on a shared index; all analytical methods applied column-by-column
+
+**Statistics**
+- Arithmetic mean (`mean`)
+- Sample standard deviation (`std_deviation`)
+- Quantile with linear interpolation (`quantile`)
+- Interquartile range (`iqr`)
+
+**Returns & transformations**
+- Simple return (`simple_return`)
+- Logarithmic return (`log_return`)
+- Cumulative return (`cumulative_return`)
 - First-order difference (`diff`)
+- Percentage change (`pct_change`)
 - Lag / forward shift (`shift`)
-- Rolling window mean (`rolling().mean()`)
+
+**Moving averages**
+- Simple moving average (`moving_average`)
+- Exponential moving average (`exponential_moving_average`)
+- MA crossover signal (`crossover_signal`)
+
+**Volatility**
+- Rolling standard deviation (`rolling_standard_deviation`)
+- True range (`true_range`)
+- Average true range (`average_true_range`)
+- Bollinger Bands (`bollinger_bands`)
+
+**Autocorrelation**
+- Autocorrelation function (`autocorrelation_function`)
+- Partial autocorrelation via Levinson-Durbin (`partial_autocorrelation_function`)
+
+**Statistical tests**
+- Augmented Dickey-Fuller stationarity test (`stationary_dickey_fuller_test`)
+- Jarque-Bera normality test (`jacque_bera_test`)
+
+**Distribution**
+- Fisher-Pearson skewness (`skewness`)
+- Excess kurtosis (`excess_kurtosis`)
 
 ## Usage
 
