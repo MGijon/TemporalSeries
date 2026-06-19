@@ -1,10 +1,11 @@
-//! Demonstrates the Jarque-Bera normality test.
+//! Demonstrates the Jarque-Bera normality test on both [`TimeSeries`] and
+//! [`TemporalSeries`].
 //!
 //! The Jarque-Bera test checks whether a series is consistent with a normal
 //! distribution by measuring its skewness (`S`) and excess kurtosis (`K`).
 //! It is commonly applied to residuals from regression or ARIMA models.
 //!
-//! [`TimeSeries::jacque_bera_test`] computes the statistic
+//! Both types expose `jacque_bera_test`, which computes the statistic
 //!
 //! ```text
 //! JB = n · (S² / 6 + K² / 24)
@@ -13,7 +14,7 @@
 //! and compares it against the χ²(2) critical value for the chosen significance
 //! level `alpha`. The null hypothesis is normality.
 //!
-//! This example contrasts two series:
+//! Each section contrasts two series:
 //!
 //! - A **near-symmetric** series — the test should return `true` because the
 //!   series does not deviate significantly from a normal distribution.
@@ -23,6 +24,11 @@
 //! # Expected output
 //!
 //! ```text
+//! --- TimeSeries ---
+//! Near-symmetric series → consistent with normality: true
+//! Heavily skewed series → consistent with normality: false
+//!
+//! --- TemporalSeries (ColumnarBackend) ---
 //! Near-symmetric series → consistent with normality: true
 //! Heavily skewed series → consistent with normality: false
 //! ```
@@ -33,26 +39,57 @@
 //! cargo run --example jarque_bera_test
 //! ```
 
-use temporalseries::series::TimeSeries;
+use temporalseries::series::{TemporalSeries, TimeSeries};
+use temporalseries::storage::ColumnarBackend;
 
 fn main() {
-    // A roughly symmetric, spread-out series does not violate normality.
-    let normal_like = TimeSeries::new(
+    // -----------------------------------------------------------------------
+    // TimeSeries
+    // -----------------------------------------------------------------------
+    println!("--- TimeSeries ---");
+
+    let normal_ts = TimeSeries::new(
         vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         vec![-2.0, -1.0, -0.5, 0.0, 0.2, 0.3, 0.5, 1.0, 1.5, 2.0],
     )
     .unwrap();
+    println!(
+        "Near-symmetric series → consistent with normality: {}",
+        normal_ts.jacque_bera_test(0.05).unwrap()
+    );
 
-    let nl_normal = normal_like.jacque_bera_test(0.05).unwrap();
-    println!("Near-symmetric series → consistent with normality: {nl_normal}");
-
-    // Nine identical values plus a massive outlier produces extreme skewness.
-    let skewed = TimeSeries::new(
+    let skewed_ts = TimeSeries::new(
         vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         vec![1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 100.0],
     )
     .unwrap();
+    println!(
+        "Heavily skewed series → consistent with normality: {}",
+        skewed_ts.jacque_bera_test(0.05).unwrap()
+    );
 
-    let sk_normal = skewed.jacque_bera_test(0.05).unwrap();
-    println!("Heavily skewed series → consistent with normality: {sk_normal}");
+    // -----------------------------------------------------------------------
+    // TemporalSeries (ColumnarBackend)
+    // -----------------------------------------------------------------------
+    println!("\n--- TemporalSeries (ColumnarBackend) ---");
+
+    let normal_col = TemporalSeries::new(
+        vec![1_i64, 2, 3, 4, 5],
+        ColumnarBackend::new(vec![1.0_f64, 2.0, 3.0, 4.0, 5.0]),
+    )
+    .unwrap();
+    println!(
+        "Near-symmetric series → consistent with normality: {}",
+        normal_col.jacque_bera_test(0.05).unwrap()
+    );
+
+    let skewed_col = TemporalSeries::new(
+        vec![1_i64, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        ColumnarBackend::new(vec![1.0_f64, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 100.0]),
+    )
+    .unwrap();
+    println!(
+        "Heavily skewed series → consistent with normality: {}",
+        skewed_col.jacque_bera_test(0.05).unwrap()
+    );
 }

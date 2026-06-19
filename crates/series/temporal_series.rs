@@ -752,6 +752,40 @@ impl<B: StorageBackend<f64>> TemporalSeries<f64, B> {
     /// # Errors
     ///
     /// Propagates errors from [`Self::stationary_dickey_fuller_statistics`].
+    ///
+    /// # Examples
+    ///
+    /// A linearly trending series is **non-stationary** — the test returns `false`
+    /// because it cannot reject the unit-root null hypothesis:
+    ///
+    /// ```rust
+    /// use temporalseries::series::TemporalSeries;
+    /// use temporalseries::storage::ColumnarBackend;
+    ///
+    /// let trend = TemporalSeries::new(
+    ///     vec![1_i64, 2, 3, 4, 5, 6, 7, 8],
+    ///     ColumnarBackend::new(vec![1.0_f64, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]),
+    /// ).unwrap();
+    ///
+    /// // DF statistic >> −1.95  =>  cannot reject unit root  =>  non-stationary
+    /// assert!(!trend.stationary_dickey_fuller_test(0.05).unwrap());
+    /// ```
+    ///
+    /// A strongly mean-reverting series is **stationary** — the DF statistic is
+    /// deeply negative and the test returns `true`:
+    ///
+    /// ```rust
+    /// use temporalseries::series::TemporalSeries;
+    /// use temporalseries::storage::ColumnarBackend;
+    ///
+    /// let alternating = TemporalSeries::new(
+    ///     vec![1_i64, 2, 3, 4, 5, 6, 7, 8],
+    ///     ColumnarBackend::new(vec![1.0_f64, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0]),
+    /// ).unwrap();
+    ///
+    /// // DF statistic -> -inf  =>  unit root rejected  =>  stationary
+    /// assert!(alternating.stationary_dickey_fuller_test(0.05).unwrap());
+    /// ```
     pub fn stationary_dickey_fuller_test(&self, alpha: f32) -> Result<bool, TemporalSeriesError> {
         let cv = match alpha {
             a if a <= 0.01 => -2.60,
@@ -834,6 +868,40 @@ impl<B: StorageBackend<f64>> TemporalSeries<f64, B> {
     /// # Errors
     ///
     /// Propagates errors from [`Self::jacque_bera_statistics`].
+    ///
+    /// # Examples
+    ///
+    /// A near-symmetric series has a low JB statistic — normality is **not** rejected
+    /// and the test returns `true`:
+    ///
+    /// ```rust
+    /// use temporalseries::series::TemporalSeries;
+    /// use temporalseries::storage::ColumnarBackend;
+    ///
+    /// let normal_like = TemporalSeries::new(
+    ///     vec![1_i64, 2, 3, 4, 5],
+    ///     ColumnarBackend::new(vec![1.0_f64, 2.0, 3.0, 4.0, 5.0]),
+    /// ).unwrap();
+    ///
+    /// // JB ≈ 0.35  <  5.991  =>  fail to reject normality
+    /// assert!(normal_like.jacque_bera_test(0.05).unwrap());
+    /// ```
+    ///
+    /// A heavily right-skewed series has a large JB statistic — normality is
+    /// **rejected** and the test returns `false`:
+    ///
+    /// ```rust
+    /// use temporalseries::series::TemporalSeries;
+    /// use temporalseries::storage::ColumnarBackend;
+    ///
+    /// let skewed = TemporalSeries::new(
+    ///     vec![1_i64, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    ///     ColumnarBackend::new(vec![1.0_f64, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 100.0]),
+    /// ).unwrap();
+    ///
+    /// // JB >> 5.991  =>  reject normality
+    /// assert!(!skewed.jacque_bera_test(0.05).unwrap());
+    /// ```
     pub fn jacque_bera_test(&self, alpha: f32) -> Result<bool, TemporalSeriesError> {
         let cv = match alpha {
             a if a <= 0.01 => 9.210,
