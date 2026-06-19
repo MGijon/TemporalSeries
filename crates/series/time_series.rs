@@ -136,12 +136,54 @@ impl TimeSeries {
 
     /// Returns the p-th quantile of the series using linear interpolation.
     ///
-    /// Equivalent to numpy's `np.quantile(arr, p, method='linear')`.
+    /// Computes the value below which a fraction `p` of observations fall.
+    /// The virtual index is `h = p * (n - 1)`; the result interpolates linearly
+    /// between `sorted[floor(h)]` and `sorted[ceil(h)]`.
+    ///
+    /// This matches `numpy.quantile(arr, p, method='linear')`.
     ///
     /// # Errors
     ///
     /// - [`TemporalSeriesError::ParameterRangeError`] if `p` is outside `[0.0, 1.0]`.
     /// - [`TemporalSeriesError::EmptySeries`] if the series has no non-NaN values.
+    ///
+    /// # Examples
+    ///
+    /// Exact quantiles on an odd-length series:
+    ///
+    /// ```rust
+    /// use temporalseries::series::TimeSeries;
+    ///
+    /// let ts = TimeSeries::new(vec![1, 2, 3, 4, 5], vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
+    ///
+    /// assert_eq!(ts.quantile(0.0).unwrap(), 1.0);
+    /// assert_eq!(ts.quantile(0.25).unwrap(), 2.0);
+    /// assert_eq!(ts.quantile(0.5).unwrap(), 3.0);
+    /// assert_eq!(ts.quantile(0.75).unwrap(), 4.0);
+    /// assert_eq!(ts.quantile(1.0).unwrap(), 5.0);
+    /// ```
+    ///
+    /// Interpolated median on an even-length series:
+    ///
+    /// ```rust
+    /// use temporalseries::series::TimeSeries;
+    ///
+    /// let ts = TimeSeries::new(vec![1, 2, 3, 4], vec![1.0, 2.0, 3.0, 4.0]).unwrap();
+    ///
+    /// // h = 0.5 * 3 = 1.5  ->  2.0 + 0.5 * (3.0 - 2.0) = 2.5
+    /// assert!((ts.quantile(0.5).unwrap() - 2.5).abs() < 1e-9);
+    /// ```
+    ///
+    /// Out-of-range `p` returns an error:
+    ///
+    /// ```rust
+    /// use temporalseries::{errors::TemporalSeriesError, series::TimeSeries};
+    ///
+    /// let ts = TimeSeries::new(vec![1, 2, 3], vec![1.0, 2.0, 3.0]).unwrap();
+    ///
+    /// assert!(matches!(ts.quantile(-0.1), Err(TemporalSeriesError::ParameterRangeError(_))));
+    /// assert!(matches!(ts.quantile(1.1),  Err(TemporalSeriesError::ParameterRangeError(_))));
+    /// ```
     pub fn quantile(&self, p: f32) -> Result<f64, TemporalSeriesError> {
         if p < 0.0 || p > 1.0 {
             return Err(TemporalSeriesError::ParameterRangeError(format!(
@@ -171,11 +213,28 @@ impl TimeSeries {
         vec![0.0]
     }
 
-    /// TODO: create an interface for this object or similar -> change rust's approach to thsi problem
-    /// Returns Inter Quantile Range
-    #[allow(dead_code)]
-    pub fn iqr(&self) -> Vec<f64> {
-        vec![0.0]
+    /// Returns the Interquartile Range (IQR) of the series.
+    ///
+    /// IQR = Q3 − Q1 = `quantile(0.75)` − `quantile(0.25)`.
+    ///
+    /// # Errors
+    ///
+    /// - [`TemporalSeriesError::EmptySeries`] if the series has no non-NaN values.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use temporalseries::series::TimeSeries;
+    ///
+    /// let ts = TimeSeries::new(vec![1, 2, 3, 4, 5], vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
+    ///
+    /// // Q1 = 2.0, Q3 = 4.0, IQR = 2.0
+    /// assert_eq!(ts.iqr().unwrap(), 2.0);
+    /// ```
+    pub fn iqr(&self) -> Result<f64, TemporalSeriesError> {
+        let q1: f64 = self.quantile(0.25)?;
+        let q3: f64 = self.quantile(0.75)?;
+        Ok(q3 - q1)
     }
 
     /// TODO: use the formula for computing this!
