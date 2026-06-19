@@ -127,7 +127,7 @@ impl TimeSeries {
         let estimated_mean: f64 = self.mean();
         let len_casted: f64 = self.len() as f64;
         if len_casted == 1.0 {
-            return 0.0;
+            0.0
         } else {
             let bessels_correction_factor: f64 = 1.0 / (len_casted - 1.0);
             let mut summatory: f64 = 0.0;
@@ -135,7 +135,7 @@ impl TimeSeries {
             for element in &self.values {
                 summatory += (element - estimated_mean).powi(2);
             }
-            return bessels_correction_factor * summatory;
+            bessels_correction_factor * summatory
         }
     }
 
@@ -190,7 +190,7 @@ impl TimeSeries {
     /// assert!(matches!(ts.quantile(1.1),  Err(TemporalSeriesError::ParameterRangeError(_))));
     /// ```
     pub fn quantile(&self, p: f32) -> Result<f64, TemporalSeriesError> {
-        if p < 0.0 || p > 1.0 {
+        if !(0.0..=1.0).contains(&p) {
             return Err(TemporalSeriesError::ParameterRangeError(format!(
                 "p must be in [0.0, 1.0], got {p}"
             )));
@@ -454,16 +454,16 @@ impl TimeSeries {
         let fast_ma: TimeSeries = self.moving_average(fast)?;
         let slow_ma: TimeSeries = self.moving_average(slow)?;
         let mut signals: Vec<f64> = vec![0.0; self.len()];
-        for i in 1..self.len() {
+        for (i, signal) in signals.iter_mut().enumerate().skip(1) {
             let prev: f64 = fast_ma.values[i - 1] - slow_ma.values[i - 1];
             let curr: f64 = fast_ma.values[i] - slow_ma.values[i];
             if prev.is_nan() || curr.is_nan() {
                 continue;
             }
             if prev <= 0.0 && curr > 0.0 {
-                signals[i] = 1.0;
+                *signal = 1.0;
             } else if prev >= 0.0 && curr < 0.0 {
-                signals[i] = -1.0;
+                *signal = -1.0;
             }
         }
         Self::new(self.index.clone(), signals)
@@ -506,12 +506,12 @@ impl TimeSeries {
         }
         let len: usize = self.len();
         let mut result: Vec<f64> = vec![f64::NAN; len];
-        for i in (n - 1)..len {
+        for (i, val) in result.iter_mut().enumerate().skip(n - 1) {
             let window: &[f64] = &self.values[i + 1 - n..=i];
             let mean: f64 = window.iter().sum::<f64>() / n as f64;
             let variance: f64 =
                 window.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / (n - 1) as f64;
-            result[i] = variance.sqrt();
+            *val = variance.sqrt();
         }
         Self::new(self.index.clone(), result)
     }
