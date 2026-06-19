@@ -216,13 +216,6 @@ impl TimeSeries {
         Ok(sorted[lo] + frac * (sorted[hi] - sorted[lo]))
     }
 
-    /// TODO: create an interface for this object or similar -> change rust's approach to thsi problem
-    /// This will only call quantile function a bunch of times...
-    #[allow(dead_code)]
-    pub fn all_quantiles(&self) -> Vec<f64> {
-        vec![0.0]
-    }
-
     /// Returns the Interquartile Range (IQR) of the series.
     ///
     /// IQR = Q3 − Q1 = `quantile(0.75)` − `quantile(0.25)`.

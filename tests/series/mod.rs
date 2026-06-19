@@ -1,4 +1,3 @@
-mod test_all_quantiles;
 mod test_autocorrelation_function;
 mod test_average_true_range;
 mod test_borillenger_bads;
