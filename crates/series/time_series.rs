@@ -810,15 +810,36 @@ impl TimeSeries {
     ///
     /// # Examples
     ///
+    /// A purely trending series is **non-stationary** — the test returns `false` because
+    /// it cannot reject the unit-root null hypothesis:
+    ///
     /// ```rust
     /// use temporalseries::series::TimeSeries;
     ///
-    /// // Pure trend — non-stationary; H0 should not be rejected.
-    /// let rw = TimeSeries::new(
+    /// let trend = TimeSeries::new(
     ///     vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     ///     vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
     /// ).unwrap();
-    /// assert!(!rw.stationary_dickey_fuller_test(0.05).unwrap());
+    ///
+    /// // DF statistic >> -1.95  =>  cannot reject unit root  =>  non-stationary
+    /// let is_stationary = trend.stationary_dickey_fuller_test(0.05).unwrap();
+    /// assert!(!is_stationary);
+    /// ```
+    ///
+    /// A strongly mean-reverting series is **stationary** — the DF statistic is
+    /// deeply negative and the test returns `true`:
+    ///
+    /// ```rust
+    /// use temporalseries::series::TimeSeries;
+    ///
+    /// let mean_reverting = TimeSeries::new(
+    ///     vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    ///     vec![1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0],
+    /// ).unwrap();
+    ///
+    /// // DF statistic -> -inf  =>  unit root rejected  =>  stationary
+    /// let is_stationary = mean_reverting.stationary_dickey_fuller_test(0.05).unwrap();
+    /// assert!(is_stationary);
     /// ```
     pub fn stationary_dickey_fuller_test(&self, alpha: f32) -> Result<bool, TemporalSeriesError> {
         let critical_value: f64 = match alpha {
@@ -943,12 +964,37 @@ impl TimeSeries {
     ///
     /// # Examples
     ///
+    /// A symmetric, uniform-ish series has near-zero skewness and moderate kurtosis —
+    /// the JB statistic stays below the critical value, so the test returns `true`
+    /// (consistent with normality):
+    ///
     /// ```rust
     /// use temporalseries::series::TimeSeries;
     ///
-    /// // [1,2,3,4,5] produces a small JB statistic — consistent with normality at 5%.
-    /// let ts = TimeSeries::new(vec![1, 2, 3, 4, 5], vec![1.0, 2.0, 3.0, 4.0, 5.0]).unwrap();
-    /// assert!(ts.jacque_bera_test(0.05).unwrap());
+    /// let symmetric = TimeSeries::new(
+    ///     vec![1, 2, 3, 4, 5],
+    ///     vec![1.0, 2.0, 3.0, 4.0, 5.0],
+    /// ).unwrap();
+    ///
+    /// // JB ≈ 0.35  <  5.991  =>  fail to reject normality
+    /// let is_normal = symmetric.jacque_bera_test(0.05).unwrap();
+    /// assert!(is_normal);
+    /// ```
+    ///
+    /// A heavily right-skewed series has a large JB statistic that exceeds the
+    /// critical value — the test returns `false` (normality rejected):
+    ///
+    /// ```rust
+    /// use temporalseries::series::TimeSeries;
+    ///
+    /// let skewed = TimeSeries::new(
+    ///     vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    ///     vec![1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 20.0],
+    /// ).unwrap();
+    ///
+    /// // JB ≈ 22.7  >  5.991  =>  reject normality
+    /// let is_normal = skewed.jacque_bera_test(0.05).unwrap();
+    /// assert!(!is_normal);
     /// ```
     pub fn jacque_bera_test(&self, alpha: f32) -> Result<bool, TemporalSeriesError> {
         let critical_value: f64 = match alpha {
