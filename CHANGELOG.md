@@ -4,6 +4,92 @@ All notable changes to this project will be documented in this file.
 
 The format is loosely based on Keep a Changelog and Semantic Versioning.
 
+## [0.1.2] - 2026-06-19
+
+### Added
+
+#### `TemporalSeries` analytical methods
+
+- Full analytical impl block on `TemporalSeries<f64, B>` (for any `StorageBackend<f64>`),
+  matching every method on `TimeSeries`:
+  `mean`, `std_deviation`, `quantile`, `iqr`,
+  `simple_return`, `log_return`, `cumulative_return`,
+  `moving_average`, `exponential_moving_average`, `crossover_signal`,
+  `rolling_standard_deviation`, `true_range`, `average_true_range`, `bollinger_bands`,
+  `autocorrelation_function`, `partial_autocorrelation_function`,
+  `stationary_dickey_fuller_statistics`, `stationary_dickey_fuller_test`,
+  `skewness`, `excess_kurtosis`, `jacque_bera_statistics`, `jacque_bera_test`.
+- `ColSeries` type alias (`TemporalSeries<f64, ColumnarBackend<f64>>`) — the concrete
+  return type for series-returning methods on `TemporalSeries`.
+- `# Examples` doc sections added to `stationary_dickey_fuller_test` and
+  `jacque_bera_test` on `TemporalSeries`.
+
+#### `Panel` analytical methods
+
+- All analytical methods implemented on `Panel`, delegating column-by-column to
+  `TimeSeries`. Scalar results returned as `HashMap<String, f64>` (or `bool`);
+  series results returned as a new `Panel`:
+  `mean`, `std_deviation`, `quantile`, `iqr`,
+  `simple_return`, `log_return`, `cumulative_return`, `diff`, `pct_change`, `shift`,
+  `moving_average`, `exponential_moving_average`, `crossover_signal`,
+  `rolling_standard_deviation`, `true_range`, `average_true_range`,
+  `bollinger_bands` (returns `(Panel, Panel, Panel)`),
+  `autocorrelation_function`, `partial_autocorrelation_function`,
+  `stationary_dickey_fuller_statistics`, `stationary_dickey_fuller_test`,
+  `skewness`, `excess_kurtosis`, `jacque_bera_statistics`, `jacque_bera_test`.
+- Private helpers `col_series`, `scalar_map`, `bool_map`, `panel_map` on `Panel`
+  to eliminate boilerplate across all method implementations.
+
+#### Test suite
+
+- `tests/series/temporal_series/` — 20 unit test files covering every analytical
+  method on `TemporalSeries` with `ColumnarBackend`.
+- `tests/panel/test_panel_methods.rs` — 25 unit tests verifying that every
+  `Panel` method produces results identical to calling the corresponding
+  `TimeSeries` method directly on each column.
+- `assert_f64_vecs_eq` helper in the panel test module — element-wise `Vec<f64>`
+  comparison that treats `NaN` as equal (needed for methods that use `NaN` as
+  a no-value sentinel at leading positions).
+
+#### Examples
+
+- `dickey_fuller_test` — expanded to show the Dickey-Fuller test on both
+  `TimeSeries` and `TemporalSeries` (with `ColumnarBackend`).
+- `jarque_bera_test` — expanded to show the Jarque-Bera test on both
+  `TimeSeries` and `TemporalSeries` (with `ColumnarBackend`).
+- `panel` — expanded to demonstrate all 25 analytical methods grouped by
+  category (statistics, returns, moving averages, volatility, autocorrelation,
+  stationarity, distribution analysis).
+
+#### Documentation
+
+- `README.md` Features section rewritten to enumerate all methods organised
+  by category across all three types.
+- `README.md` Statistical Tests section added, documenting the Dickey-Fuller
+  and Jarque-Bera tests with formulas, critical-value tables, and examples.
+- Examples table updated with expanded descriptions for `panel`,
+  `dickey_fuller_test`, and `jarque_bera_test`.
+
+### Changed
+
+- Test directory restructured to mirror crate layout:
+  `tests/series/time_series/` for `TimeSeries` tests and
+  `tests/series/temporal_series/` for `TemporalSeries` tests,
+  both nested under `tests/series/`.
+
+### Fixed
+
+- Five `cargo clippy` warnings in `crates/series/time_series.rs`:
+  - `needless_return` in `std_deviation` — converted `if/else` to expression form.
+  - `manual_range_contains` in `quantile` — `p < 0.0 || p > 1.0` replaced with
+    `!(0.0..=1.0).contains(&p)`.
+  - `needless_range_loop` in `crossover_signal` — index loop replaced with
+    `signals.iter_mut().enumerate().skip(1)`.
+  - `needless_range_loop` in `rolling_standard_deviation` — index loop replaced
+    with `result.iter_mut().enumerate().skip(n - 1)`.
+
+---
+
 ## [0.1.1] - 2026-06-05
 
 ### Added
