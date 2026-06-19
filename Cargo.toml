@@ -1,6 +1,6 @@
 [package]
 name = "temporalseries"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "High-performance Rust library for quantitative time-series analysis"
 license = "MIT"
