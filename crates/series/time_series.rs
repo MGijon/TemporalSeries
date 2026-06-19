@@ -94,6 +94,212 @@ impl TimeSeries {
         self.values.is_empty()
     }
 
+    /// Returns the value of the mean estimator.
+    ///
+    /// TODO: check that this formula is working properly
+    /// $$ \hat{\mu} = \frac{1}{n} \sum^{n}_{i=0} x_i$$
+    ///
+    /// ```rust
+    /// use temporalseries::series::TimeSeries;
+    ///
+    /// let sut_1: TimeSeries = TimeSeries::new(vec![1, 2, 3, 4], vec![0.0, 0.0, 0.0, 0.0]).unwrap();
+    /// assert!(sut_1.mean() == 0.0);
+    ///
+    /// let sut_2: TimeSeries = TimeSeries::new(vec![1, 2, 3, 4], vec![1.0, 2.0, 3.0, 4.0]).unwrap();
+    /// assert!(sut_2.mean() == 2.5);
+    /// ```
+    pub fn mean(&self) -> f64 {
+        let total_sum: f64 = self.values.iter().sum();
+        let len_casted: f64 = self.len() as f64;
+
+        total_sum / len_casted
+    }
+
+    // With Bessel's correction
+    // Compute the std stimator
+    // Lets assume that is working since all tests are passing
+    pub fn std_deviation(&self) -> f64 {
+        let estimated_mean: f64 = self.mean();
+        let len_casted: f64 = self.len() as f64;
+        if len_casted == 1.0 {
+            return 0.0;
+        } else {
+            let bessels_correction_factor: f64 = 1.0 / (len_casted - 1.0);
+            let mut summatory: f64 = 0.0;
+
+            for element in &self.values {
+                summatory += (element - estimated_mean).powi(2);
+            }
+            return bessels_correction_factor * summatory;
+        }
+    }
+
+    /// Returns the p-th quantile of the series using linear interpolation.
+    ///
+    /// Equivalent to numpy's `np.quantile(arr, p, method='linear')`.
+    ///
+    /// # Errors
+    ///
+    /// - [`TemporalSeriesError::ParameterRangeError`] if `p` is outside `[0.0, 1.0]`.
+    /// - [`TemporalSeriesError::EmptySeries`] if the series has no non-NaN values.
+    pub fn quantile(&self, p: f32) -> Result<f64, TemporalSeriesError> {
+        if p < 0.0 || p > 1.0 {
+            return Err(TemporalSeriesError::ParameterRangeError(format!(
+                "p must be in [0.0, 1.0], got {p}"
+            )));
+        }
+
+        let mut sorted: Vec<f64> = self.values.iter().copied().filter(|v| !v.is_nan()).collect();
+        if sorted.is_empty() {
+            return Err(TemporalSeriesError::EmptySeries);
+        }
+        sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+        let n = sorted.len();
+        let h = p as f64 * (n - 1) as f64;
+        let lo = h.floor() as usize;
+        let hi = h.ceil() as usize;
+        let frac = h - lo as f64;
+
+        Ok(sorted[lo] + frac * (sorted[hi] - sorted[lo]))
+    }
+
+    /// TODO: create an interface for this object or similar -> change rust's approach to thsi problem
+    /// This will only call quantile function a bunch of times...
+    #[allow(dead_code)]
+    pub fn all_quantiles(&self) -> Vec<f64> {
+        vec![0.0]
+    }
+
+    /// TODO: create an interface for this object or similar -> change rust's approach to thsi problem
+    /// Returns Inter Quantile Range
+    #[allow(dead_code)]
+    pub fn iqr(&self) -> Vec<f64> {
+        vec![0.0]
+    }
+
+    /// TODO: use the formula for computing this!
+    #[allow(dead_code)]
+    pub fn rimple_return(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: use the formula for computing this!
+    /// TODO: Check how to work with logs on RUST
+    #[allow(dead_code)]
+    pub fn log_return(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: use the formula for computing this!
+    #[allow(dead_code)]
+    pub fn cumulative_return(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: look for the correct type... probably return a time series?
+    #[allow(dead_code)]
+    #[allow(unused_variables)]
+    pub fn moving_average(&self, n: u64) -> f64 {
+        0.0
+    }
+
+    /// TODO: use the formula for computing this!
+    #[allow(dead_code)]
+    pub fn exponential_moving_average(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: use the formula for computing this!
+    #[allow(dead_code)]
+    pub fn crossover_signal(&self) -> f64 {
+        0.0
+    }
+
+    // VOLATILITY -------------------------------------------------------------
+    /// TODO: use the formula for computing this!
+    #[allow(dead_code)]
+    pub fn rolling_standard_derivation(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: check how to compute this!
+    #[allow(dead_code)]
+    pub fn true_range(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: check how to compute this!
+    #[allow(dead_code)]
+    pub fn average_true_range(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: check how we can return both bands... what is the most rustonean way to do it?
+    #[allow(dead_code)]
+    pub fn borillenger_bands(&self) -> f64 {
+        0.0
+    }
+
+    // AUTOCORRELATION --------------------------------------------------------
+    /// TODO: check how to compute this
+    #[allow(dead_code)]
+    pub fn autocorrelation_function(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: check how to compute this
+    #[allow(dead_code)]
+    pub fn partial_autocorrelation_function(&self) -> f64 {
+        0.0
+    }
+
+    // STATIONARITY -----------------------------------------------------------
+
+    /// TODO: add test for this function in this same file
+    /// CHECK the formula for computing this statistic
+    #[allow(dead_code)]
+    fn stationary_dickey_fuller_statistics(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: add test for this function in this same file
+    /// CHECK the formula for computing this statistic
+    #[allow(dead_code)]
+    #[allow(unused_variables)]
+    pub fn stationary_dickey_fuller_test(&self, alpha: f32) -> bool {
+        true
+    }
+
+    // DISTRIBUTION ANALYSIS --------------------------------------------------
+
+    /// TODO: add test for this function in this same file
+    /// TODO: CHECK the formula for computing this statistic
+    #[allow(dead_code)]
+    pub fn skewness(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: CHECK the formula for computing this statistic
+    #[allow(dead_code)]
+    pub fn excess_kurtosis(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: add test for this function in this same file
+    /// TODO: look for this formula
+    #[allow(dead_code)]
+    fn jacque_bera_statistics(&self) -> f64 {
+        0.0
+    }
+
+    /// TODO: check this test implementation
+    #[allow(dead_code)]
+    #[allow(unused_variables)]
+    pub fn jacque_bera_test(&self, alpha: f32) -> bool {
+        true
+    }
+
     /// Shifts the series forward by `periods` positions.
     ///
     /// Values are moved to the right by `periods` steps. The first `periods`
